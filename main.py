@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 
 
@@ -57,6 +59,7 @@ def change_colum():
     df = pd.read_excel('result_colum_category.xlsx')
 
     new_data = []
+    brand_dict = {}
 
     for i, row in df.iterrows():
         brand = row['Name']
@@ -64,24 +67,37 @@ def change_colum():
         engine = row['Engines']
         engine_capacity = row['TypeName']
         hp = row['HorsePowers']
-        year = row['Year']
 
+        # if brand not in brand_dict:
+        #     brand_dict[brand] = {}
+        # if model not in brand_dict[brand]:
+        #     brand_dict[brand][model] = []
+        # brand_dict[brand][model].append(engine)
+        if brand not in brand_dict:
+            brand_dict[brand] = {}
+        if model not in brand_dict[brand]:
+            brand_dict[brand][model] = {}
+        if engine_capacity not in brand_dict[brand][model]:
+            brand_dict[brand][model][engine_capacity] = []
+        brand_dict[brand][model][engine_capacity].append(engine)
 
+    with open('brand_dict.json', 'w') as f:
+        json.dump(brand_dict, f)
 
-        # приводим дату к нужному формату
-        if '-' in year:
-            year_gm_start, year_gm_end = year.split('-')
-            start_year, start_month = year_gm_start[:4], year_gm_start[4:]
-            end_year, end_month = year_gm_end[:4], year_gm_end[4:]
-            year_start = f'{start_month}.{start_year}'
-            year_end = f'{end_month}.{end_year}'
-        else:
-            year_start = year_end = f'{year[4:]}.{year[:4]}'
-
-        new_data.append([brand, model, engine, engine_capacity, hp, year_start, year_end])
-
-    new_df = pd.DataFrame(new_data, columns=['Brand', 'Model', 'Engine', 'Engine_Capacity', 'Horsepower', 'Year_Start', 'Year_End'])
-    print(new_df)
+    #     # приводим дату к нужному формату
+    #     if '-' in year:
+    #         year_gm_start, year_gm_end = year.split('-')
+    #         start_year, start_month = year_gm_start[:4], year_gm_start[4:]
+    #         end_year, end_month = year_gm_end[:4], year_gm_end[4:]
+    #         year_start = f'{start_month}.{start_year}'
+    #         year_end = f'{end_month}.{end_year}'
+    #     else:
+    #         year_start = year_end = f'{year[4:]}.{year[:4]}'
+    #
+    #     new_data.append([brand, model, engine, engine_capacity, hp, year_start, year_end])
+    #
+    # new_df = pd.DataFrame(new_data, columns=['Brand', 'Model', 'Engine', 'Engine_Capacity', 'Horsepower', 'Year_Start', 'Year_End'])
+    # print(new_df)
 
 
 # Press the green button in the gutter to run the script.
