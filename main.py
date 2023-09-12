@@ -56,6 +56,8 @@ def get_category():
 def change_colum():
     df = pd.read_excel('result_colum_category.xlsx')
 
+    new_data = []
+
     for i, row in df.iterrows():
         brand = row['Name']
         model = row['VM']
@@ -63,6 +65,8 @@ def change_colum():
         engine_capacity = row['TypeName']
         hp = row['HorsePowers']
         year = row['Year']
+
+
 
         # приводим дату к нужному формату
         if '-' in year:
@@ -73,7 +77,11 @@ def change_colum():
             year_end = f'{end_month}.{end_year}'
         else:
             year_start = year_end = f'{year[4:]}.{year[:4]}'
-        print(brand, model, engine, engine_capacity, hp, year_start, year_end)
+
+        new_data.append([brand, model, engine, engine_capacity, hp, year_start, year_end])
+
+    new_df = pd.DataFrame(new_data, columns=['Brand', 'Model', 'Engine', 'Engine_Capacity', 'Horsepower', 'Year_Start', 'Year_End'])
+    print(new_df)
 
 
 # Press the green button in the gutter to run the script.
