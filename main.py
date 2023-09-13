@@ -57,8 +57,6 @@ def get_category():
 
 def change_colum():
     df = pd.read_excel('result_colum_category.xlsx')
-
-    new_data = []
     brand_dict = {}
 
     for i, row in df.iterrows():
@@ -67,34 +65,11 @@ def change_colum():
         engine = row['Engines']
         engine_capacity = row['TypeName']
         hp = row['HorsePowers']
-        year = row['Year']
-
-        if '-' in year:
-            year_start, year_end = year.split('-')
-            # year_gm_start, year_gm_end = year.split('-')
-            # start_year, start_month = year_gm_start[:4], year_gm_start[4:]
-            # end_year, end_month = year_gm_end[:4], year_gm_end[4:]
-            # year_start = f'{start_month}.{start_year}'
-            # year_end = f'{end_month}.{end_year}'
-        else:
-            # year_start = year_end = f'{year[4:]}.{year[:4]}'
-            year_start = year_end = year
-            print(year_start, year_end, model)
 
         if brand not in brand_dict:
             brand_dict[brand] = {}
         if model not in brand_dict[brand]:
             brand_dict[brand][model] = {}
-            brand_dict[brand][model]['start_date'] = year_start
-            brand_dict[brand][model]['end_date'] = year_end
-        else:
-            if year_start < brand_dict[brand][model]['start_date']:
-                brand_dict[brand][model]['start_date'] = year_start
-            if year_end > brand_dict[brand][model]['end_date']:
-                brand_dict[brand][model]['end_date'] = year_end
-
-
-
         if engine_capacity not in brand_dict[brand][model]:
             brand_dict[brand][model][engine_capacity] = {}
         if engine not in brand_dict[brand][model][engine_capacity]:
@@ -102,6 +77,49 @@ def change_colum():
 
     with open('brand_dict.json', 'w', encoding='utf-8') as f:
         json.dump(brand_dict, f, ensure_ascii=False)
+
+    new_df = pd.DataFrame()
+    prev_brand = None
+    prev_model = None
+    for brand in brand_dict.keys():
+        for model in brand_dict[brand].keys():
+            for engine_cap in brand_dict[brand][model].keys():
+                lst = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
+                hp = [brand_dict[brand][model][engine_cap][hp] for hp in brand_dict[brand][model][engine_cap].keys()]
+                if brand != prev_brand:
+                    brand_value = brand
+                else:
+                    brand_value = ''
+                if model != prev_model:
+                    model_value = model
+                else:
+                    model_value = ''
+
+                df = pd.DataFrame.from_dict({'МОДЕЛЬ': [brand_value, model_value, engine_cap],
+                                             'КОД ДВИГАТЕЛЯ': ['', '', ', '.join(lst)],
+                                             'Мощность Л.С': ['', '', ', '.join(hp)],
+                                             'Name': ['', '', brand],
+                                             'VM': ['', '', model],
+                                             'TypeName': ['', '', engine_cap],
+                                             }, orient='index')
+                df = df.transpose()
+                new_df = pd.concat([new_df, df], ignore_index=True)
+                prev_brand = brand
+                prev_model = model
+    pd.set_option('display.width', 500)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    print(new_df.head(10))
+    out_df = pd.read_excel('result_colum_category.xlsx')
+    out_df = out_df.drop(columns=["HorsePowers"])
+    new_df = new_df.merge(out_df, how='left', on=["Name", "VM", "TypeName"])
+    new_df = new_df.drop(columns=["Name"])
+    new_df = new_df.drop(columns=["VM"])
+    new_df = new_df.drop(columns=["TypeName"])
+    new_df = new_df.drop(columns=["Engines"])
+    print(new_df.head(10))
+    # new_df.to_excel("res.xlsx", index=False)
+
 
     #     # приводим дату к нужному формату
     #     if '-' in year:
@@ -112,16 +130,9 @@ def change_colum():
     #         year_end = f'{end_month}.{end_year}'
     #     else:
     #         year_start = year_end = f'{year[4:]}.{year[:4]}'
-    #
-    #     new_data.append([brand, model, engine, engine_capacity, hp, year_start, year_end])
-    #
-    # new_df = pd.DataFrame(new_data, columns=['Brand', 'Model', 'Engine', 'Engine_Capacity', 'Horsepower', 'Year_Start', 'Year_End'])
-    # print(new_df)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # get_category()
     change_colum()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
