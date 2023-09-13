@@ -67,22 +67,41 @@ def change_colum():
         engine = row['Engines']
         engine_capacity = row['TypeName']
         hp = row['HorsePowers']
+        year = row['Year']
 
-        # if brand not in brand_dict:
-        #     brand_dict[brand] = {}
-        # if model not in brand_dict[brand]:
-        #     brand_dict[brand][model] = []
-        # brand_dict[brand][model].append(engine)
+        if '-' in year:
+            year_start, year_end = year.split('-')
+            # year_gm_start, year_gm_end = year.split('-')
+            # start_year, start_month = year_gm_start[:4], year_gm_start[4:]
+            # end_year, end_month = year_gm_end[:4], year_gm_end[4:]
+            # year_start = f'{start_month}.{start_year}'
+            # year_end = f'{end_month}.{end_year}'
+        else:
+            # year_start = year_end = f'{year[4:]}.{year[:4]}'
+            year_start = year_end = year
+            print(year_start, year_end, model)
+
         if brand not in brand_dict:
             brand_dict[brand] = {}
         if model not in brand_dict[brand]:
             brand_dict[brand][model] = {}
-        if engine_capacity not in brand_dict[brand][model]:
-            brand_dict[brand][model][engine_capacity] = []
-        brand_dict[brand][model][engine_capacity].append(engine)
+            brand_dict[brand][model]['start_date'] = year_start
+            brand_dict[brand][model]['end_date'] = year_end
+        else:
+            if year_start < brand_dict[brand][model]['start_date']:
+                brand_dict[brand][model]['start_date'] = year_start
+            if year_end > brand_dict[brand][model]['end_date']:
+                brand_dict[brand][model]['end_date'] = year_end
 
-    with open('brand_dict.json', 'w') as f:
-        json.dump(brand_dict, f)
+
+
+        if engine_capacity not in brand_dict[brand][model]:
+            brand_dict[brand][model][engine_capacity] = {}
+        if engine not in brand_dict[brand][model][engine_capacity]:
+            brand_dict[brand][model][engine_capacity][engine] = hp
+
+    with open('brand_dict.json', 'w', encoding='utf-8') as f:
+        json.dump(brand_dict, f, ensure_ascii=False)
 
     #     # приводим дату к нужному формату
     #     if '-' in year:
