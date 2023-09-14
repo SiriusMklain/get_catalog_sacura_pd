@@ -110,18 +110,12 @@ def change_colum():
     new_df = pd.DataFrame()
     prev_brand = None
     prev_model = None
-    # for brand in brand_dict.keys():
-    #     for model in brand_dict[brand].keys():
-    #         for engine_cap in brand_dict[brand][model].keys():
-    #             # print(brand_dict[brand][model]["start_date"])
-    #             # print(brand_dict[brand][model]["end_date"])
-    #             engine_list = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
-    #             hp = [brand_dict[brand][model][engine_cap][hp] for hp in brand_dict[brand][model][engine_cap].keys()]
     for brand in brand_dict.keys():
         for model in brand_dict[brand].keys():
+            start_date = brand_dict[brand][model]["start_date"]
+            end_date = brand_dict[brand][model]["end_date"]
             for engine_cap in brand_dict[brand][model].keys():
-                start_date = brand_dict[brand][model]["start_date"]
-                end_date = brand_dict[brand][model]["end_date"]
+
                 if isinstance(brand_dict[brand][model][engine_cap], dict):
                     engine_list = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
                     hp = [brand_dict[brand][model][engine_cap][hp] for hp in brand_dict[brand][model][engine_cap].keys()]
@@ -130,10 +124,12 @@ def change_colum():
                     else:
                         brand_value = ''
                     if model != prev_model:
-                        model_value = model
+                        start_date = start_date[-2:] + "." + start_date[:-2]
+                        end_date = end_date[-2:] + "." + end_date[:-2]
+                        model_value = f'{model} {start_date}-{end_date}'
                     else:
                         model_value = ''
-                    df = pd.DataFrame.from_dict({'МОДЕЛЬ': [brand_value, f'{model_value} {start_date}-{end_date}', engine_cap],
+                    df = pd.DataFrame.from_dict({'МОДЕЛЬ': [brand_value, model_value, engine_cap],
                                                  'КОД ДВИГАТЕЛЯ': ['', '', ', '.join(engine_list)],
                                                  'Мощность Л.С': ['', '', ', '.join(hp)],
                                                  'Name': ['', '', brand],
@@ -159,8 +155,10 @@ def change_colum():
     new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Салонный фильтр'}, inplace=True)
     new_df = new_df.drop(columns=["Year"])
     new_df = new_df[new_df['МОДЕЛЬ'] != '']
+    # new_df.style.set_properties(subset=['МОДЕЛЬ'], **{'font-weight': 'bold'})
+    df.style.applymap(lambda x: 'font-weight: bold', subset=['МОДЕЛЬ'])
     print(new_df.head(10))
-    # new_df.to_excel("res.xlsx", index=False)
+    new_df.to_excel("res.xlsx", index=False)
 
 
 if __name__ == '__main__':
