@@ -104,63 +104,62 @@ def change_colum():
         if engine not in brand_dict[brand][model][engine_capacity]:
             brand_dict[brand][model][engine_capacity][engine] = hp
 
-
-        #     if '-' in year:
-        #         year_gm_start, year_gm_end = year.split('-')
-        #         start_year, start_month = year_gm_start[:4], year_gm_start[4:]
-        #         end_year, end_month = year_gm_end[:4], year_gm_end[4:]
-        #         year_start = f'{start_month}.{start_year}'
-        #         year_end = f'{end_month}.{end_year}'
-        #     else:
-        #         year_start = year_end = f'{year[4:]}.{year[:4]}'
-
     with open('brand_dict.json', 'w', encoding='utf-8') as f:
         json.dump(brand_dict, f, ensure_ascii=False)
 
-    # new_df = pd.DataFrame()
-    # prev_brand = None
-    # prev_model = None
+    new_df = pd.DataFrame()
+    prev_brand = None
+    prev_model = None
     # for brand in brand_dict.keys():
     #     for model in brand_dict[brand].keys():
     #         for engine_cap in brand_dict[brand][model].keys():
-    #             lst = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
+    #             # print(brand_dict[brand][model]["start_date"])
+    #             # print(brand_dict[brand][model]["end_date"])
+    #             engine_list = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
     #             hp = [brand_dict[brand][model][engine_cap][hp] for hp in brand_dict[brand][model][engine_cap].keys()]
-    #             if brand != prev_brand:
-    #                 brand_value = brand
-    #             else:
-    #                 brand_value = ''
-    #             if model != prev_model:
-    #                 model_value = model
-    #             else:
-    #                 model_value = ''
-    #
-    #             df = pd.DataFrame.from_dict({'МОДЕЛЬ': [brand_value, model_value, engine_cap],
-    #                                          'КОД ДВИГАТЕЛЯ': ['', '', ', '.join(lst)],
-    #                                          'Мощность Л.С': ['', '', ', '.join(hp)],
-    #                                          'Name': ['', '', brand],
-    #                                          'VM': ['', '', model],
-    #                                          'TypeName': ['', '', engine_cap],
-    #                                          }, orient='index')
-    #             df = df.transpose()
-    #             new_df = pd.concat([new_df, df], ignore_index=True)
-    #             prev_brand = brand
-    #             prev_model = model
-    # pd.set_option('display.width', 500)
-    # pd.set_option('display.max_columns', None)
-    # pd.set_option('display.max_rows', None)
-    # out_df = pd.read_excel('result_colum_category.xlsx')
-    # out_df = out_df.drop(columns=["HorsePowers"])
-    # out_df = out_df.drop_duplicates(subset=['Name', 'VM', 'TypeName'])
-    #
-    # new_df = new_df.merge(out_df, how='left', on=["Name", "VM", "TypeName"])
-    # new_df = new_df.drop(columns=["Name"])
-    # new_df = new_df.drop(columns=["VM"])
-    # new_df = new_df.drop(columns=["TypeName"])
-    # new_df = new_df.drop(columns=["Engines"])
-    # new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Салонный фильтр'}, inplace=True)
-    # new_df = new_df.drop(columns=["Year"])
-    # new_df = new_df[new_df['МОДЕЛЬ'] != '']
-    # print(new_df.head(10))
+    for brand in brand_dict.keys():
+        for model in brand_dict[brand].keys():
+            for engine_cap in brand_dict[brand][model].keys():
+                start_date = brand_dict[brand][model]["start_date"]
+                end_date = brand_dict[brand][model]["end_date"]
+                if isinstance(brand_dict[brand][model][engine_cap], dict):
+                    engine_list = [engines for engines in brand_dict[brand][model][engine_cap].keys()]
+                    hp = [brand_dict[brand][model][engine_cap][hp] for hp in brand_dict[brand][model][engine_cap].keys()]
+                    if brand != prev_brand:
+                        brand_value = brand
+                    else:
+                        brand_value = ''
+                    if model != prev_model:
+                        model_value = model
+                    else:
+                        model_value = ''
+                    df = pd.DataFrame.from_dict({'МОДЕЛЬ': [brand_value, f'{model_value} {start_date}-{end_date}', engine_cap],
+                                                 'КОД ДВИГАТЕЛЯ': ['', '', ', '.join(engine_list)],
+                                                 'Мощность Л.С': ['', '', ', '.join(hp)],
+                                                 'Name': ['', '', brand],
+                                                 'VM': ['', '', model],
+                                                 'TypeName': ['', '', engine_cap],
+                                                 }, orient='index')
+                    df = df.transpose()
+                    new_df = pd.concat([new_df, df], ignore_index=True)
+                    prev_brand = brand
+                    prev_model = model
+    pd.set_option('display.width', 500)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    out_df = pd.read_excel('result_colum_category.xlsx')
+    out_df = out_df.drop(columns=["HorsePowers"])
+    out_df = out_df.drop_duplicates(subset=['Name', 'VM', 'TypeName'])
+
+    new_df = new_df.merge(out_df, how='left', on=["Name", "VM", "TypeName"])
+    new_df = new_df.drop(columns=["Name"])
+    new_df = new_df.drop(columns=["VM"])
+    new_df = new_df.drop(columns=["TypeName"])
+    new_df = new_df.drop(columns=["Engines"])
+    new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Салонный фильтр'}, inplace=True)
+    new_df = new_df.drop(columns=["Year"])
+    new_df = new_df[new_df['МОДЕЛЬ'] != '']
+    print(new_df.head(10))
     # new_df.to_excel("res.xlsx", index=False)
 
 
