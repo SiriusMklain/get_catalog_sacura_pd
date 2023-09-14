@@ -111,14 +111,19 @@ def change_colum():
     pd.set_option('display.max_rows', None)
     out_df = pd.read_excel('result_colum_category.xlsx')
     out_df = out_df.drop(columns=["HorsePowers"])
+    # out_df = out_df.drop(columns=["Year"])
+    out_df = out_df.drop_duplicates(subset=['Name', 'VM', 'TypeName'])
+    print(out_df.head(10))
     new_df = new_df.merge(out_df, how='left', on=["Name", "VM", "TypeName"])
-    new_df = new_df.drop_duplicates(subset=['МОДЕЛЬ', 'КОД ДВИГАТЕЛЯ', 'Мощность Л.С', "Year"])
+    # new_df = new_df.drop_duplicates(subset=['МОДЕЛЬ', 'КОД ДВИГАТЕЛЯ', 'Мощность Л.С'])
 
     new_df = new_df.drop(columns=["Name"])
     new_df = new_df.drop(columns=["VM"])
     new_df = new_df.drop(columns=["TypeName"])
     new_df = new_df.drop(columns=["Engines"])
-    new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Воздушный фильтр'}, inplace=True)
+    new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Салонный фильтр'}, inplace=True)
+    new_df = new_df.drop(columns=["Year"])
+    new_df = new_df[new_df['МОДЕЛЬ'] != '']
     print(new_df.head(10))
     new_df.to_excel("res.xlsx", index=False)
 
