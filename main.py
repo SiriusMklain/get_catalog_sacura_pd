@@ -1,6 +1,8 @@
 import json
-
 import pandas as pd
+from openpyxl import Workbook
+from openpyxl.reader.excel import load_workbook
+from openpyxl.styles import PatternFill
 
 
 def get_category():
@@ -56,6 +58,7 @@ def get_category():
 
 
 def change_colum():
+
     df = pd.read_excel('result_colum_category.xlsx')
     brand_dict = {}
 
@@ -155,13 +158,56 @@ def change_colum():
     new_df.rename(columns={'Фильтр, воздух во внутренном пространстве': 'Салонный фильтр'}, inplace=True)
     new_df = new_df.drop(columns=["Year"])
     new_df = new_df[new_df['МОДЕЛЬ'] != '']
-    # new_df.style.set_properties(subset=['МОДЕЛЬ'], **{'font-weight': 'bold'})
-    df.style.applymap(lambda x: 'font-weight: bold', subset=['МОДЕЛЬ'])
     print(new_df.head(10))
     new_df.to_excel("res.xlsx", index=False)
 
 
+def strip_filter():
+    df = pd.read_excel('res.xlsx')
+    df['Салонный фильтр CAC'] = df['Салонный фильтр'].apply(lambda x: ', '.join([val.strip() for val in str(x).split(',')
+                                                                                 if str(val).strip().startswith('CAC')]))
+    df['Салонный фильтр CAB'] = df['Салонный фильтр'].apply(lambda x: ', '.join([val.strip() for val in str(x).split(',')
+                                                                                 if str(val).strip().startswith('CAB')]))
+    df['Салонный фильтр CA'] = df['Салонный фильтр'].apply(lambda x: ', '.join([val.strip() for val in str(x).split(',')
+                                                                                if str(val).strip().startswith('CA')
+                                                                                and not str(val).strip().startswith('CAC')
+                                                                                and not str(val).strip().startswith('CAB')]))
+    df = df.drop('Салонный фильтр', axis=1)
+    # print(df)
+    df.to_excel("res_strip.xlsx", index=False)
+
+
+
+def color_rows(input_file):
+    wb = load_workbook(filename=input_file)
+    ws = wb.active
+
+    for i in range(2, ws.max_row + 1):
+        current_row = ws[i]
+        prev_row = ws[i - 1]
+
+        if not current_row[1].value and not prev_row[1].value:
+            for cell in current_row:
+                cell.fill = PatternFill(start_color="FF8300", end_color="FF8300", fill_type="solid")  # оранжевый
+
+            for cell in prev_row:
+                cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # красный
+
+        elif not current_row[1].value:
+            for cell in current_row:
+                cell.fill = PatternFill(start_color="FF8300", end_color="FF8300", fill_type="solid")  # оранжевый
+        else:
+            for cell in current_row:
+                cell.fill = PatternFill(start_color="F5F5DC", end_color="F5F5DC", fill_type="solid")  # бежевый
+
+        # print('')
+    output_file = input_file.replace('.xlsx', 'result.xlsx')
+    wb.save(output_file)
+
+
 if __name__ == '__main__':
     # get_category()
-    change_colum()
+    # change_colum()
+    # strip_filter()
+    color_rows('res_strip.xlsx')
 
