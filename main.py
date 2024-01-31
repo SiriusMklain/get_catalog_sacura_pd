@@ -7,9 +7,9 @@ from openpyxl.styles import PatternFill
 import ast
 
 def get_category():
-    res_df = pd.read_excel('export_sakura.xlsx')
+    res_df = pd.read_excel('export_sakura2.xlsx')
     # Убираем дубликаты по Марке, Модели двигателю и Номеру артикля
-    res_df = res_df.drop_duplicates(subset=['Name', 'VM', "ArticleNumber", "Engines"])
+    res_df = res_df.drop_duplicates(subset=['Name', 'VM', "ArticleNumber", "Engines", "TypeName"])
     #
     name_df = res_df[["Name", "VM", "Engines", "TypeName", "HorsePowers", "Year"]].drop_duplicates(subset=['Name', 'VM', "Engines", "TypeName"])
     # print(name_df)
@@ -58,7 +58,7 @@ def get_category():
     r_df = r_df.drop(columns=['index'])
     print(r_df)
 
-    r_df.to_excel("result_colum_category.xlsx", index=False)
+    r_df.to_excel("result_colum_category2.xlsx", index=False)
 
 
 def change_colum():
@@ -521,12 +521,12 @@ def add_crit():
 
 
 if __name__ == '__main__':
-    # get_category()
+    get_category()
     # change_colum()
     # strip_filter()
     #
     # art_criteria()
 
-    add_crit()
+    # add_crit()
 
     # color_rows('res_art_criteria.xlsx')
